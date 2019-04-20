@@ -6,6 +6,9 @@ param (
 # Split certificate names by comma or semi-colon
 $certificateName = $CertificateNames.Replace(',', ';') -split ';' | ForEach-Object -Process { $_.Trim() } | Select-Object -First 1
 
+# For wildcard certificates, Posh-ACME replaces * with ! in the directory name
+$certificateName = $certificateName.Replace('*', '!')
+
 # Set working directory
 $workingDirectory = Join-Path -Path "." -ChildPath "pa"
 
@@ -32,7 +35,7 @@ if ((Test-Path -Path $orderDirectoryPath) -and (Test-Path -Path $orderDataPath) 
     $certificate = New-Object -TypeName System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $pfxFilePath, $orderData.PfxPass, 'EphemeralKeySet'
 
     # Get the current certificate from key vault (if any)
-    $azureKeyVaultCertificateName = $certificateName.Replace(".", "-").Replace("*", "")
+    $azureKeyVaultCertificateName = $certificateName.Replace(".", "-").Replace("!", "wildcard")
     $keyVaultResource = Get-AzResource -ResourceId $KeyVaultResourceId
     $azureKeyVaultCertificate = Get-AzKeyVaultCertificate -VaultName $keyVaultResource.Name -Name $azureKeyVaultCertificateName -ErrorAction SilentlyContinue
 
