@@ -2,7 +2,8 @@ param (
     [string] $AcmeDirectory,
     [string] $AcmeContact,
     [string] $CertificateNames,
-    [string] $StorageContainerSASToken
+    [string] $StorageContainerSASToken,
+    [string] $CloudFlareAPIToken
 )
 
 # Supress progress messages. Azure DevOps doesn't format them correctly (used by New-PACertificate)
@@ -36,18 +37,8 @@ elseif ($account.contact -ne "mailto:$AcmeContact") {
     Set-PAAccount -ID $account.id -Contact $AcmeContact
 }
 
-# Acquire access token for Azure (as we want to leverage the existing connection)
-$azureContext = Get-AzContext
-$currentAzureProfile = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile;
-$currentAzureProfileClient = New-Object Microsoft.Azure.Commands.ResourceManager.Common.RMProfileClient($currentAzureProfile);
-$azureAccessToken = $currentAzureProfileClient.AcquireAccessToken($azureContext.Tenant.Id).AccessToken;
-
-# Request certificate
-$paPluginArgs = @{
-    AZSubscriptionId = $azureContext.Subscription.Id
-    AZAccessToken    = $azureAccessToken;
-}
-New-PACertificate -Domain $CertificateNamesArr -DnsPlugin Azure -PluginArgs $paPluginArgs
+$pArgs = @{ CFTokenInsecure = $CloudFlareAPIToken }
+New-PACertificate -Domain $CertificateNamesArr -DnsPlugin Cloudflare -PluginArgs $pArgs
 
 # Sync working directory back to storage container
 ./azcopy sync "$workingDirectory" "$StorageContainerSASToken"
