@@ -40,7 +40,7 @@ steps:
     azureSubscription: 'ACME Certificate Automation'
     scriptType: 'FilePath'
     scriptPath: 'New-AcmeCertificate.ps1 '
-    scriptArguments: '-AcmeDirectory "$(AcmeDirectory)" -AcmeContact "$(AcmeContact)" -CertificateNames "$(CertificateNames)" -StorageContainerSASToken "$(StorageContainerSASToken)"' -CloudFlareApiToken "$(CloudFlareAPIToken)"
+    scriptArguments: '-AcmeDirectory "$(AcmeDirectory)" -AcmeContact "$(AcmeContact)" -CertificateNames "$(CertificateNames)" -StorageContainerSASToken "$(StorageContainerSASToken)" -CloudFlareApiToken "$(CloudFlareAPIToken)"'
     errorActionPreference: 'stop'
     failOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
