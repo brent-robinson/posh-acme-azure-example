@@ -1,8 +1,7 @@
 name: 0.0.$(Build.BuildId)
 
 # Linux based agent; all except the first step will also work on Windows
-queue:
-  name: Hosted Ubuntu 1604
+pool: "Certificate Builds"
 
 # The scheduled trigger will be set in the Azure DevOps portal
 trigger: none
