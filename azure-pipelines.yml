@@ -11,6 +11,7 @@ steps:
 - task: DeleteFiles@1
   inputs:
     sourceFolder: $(Agent.BuildDirectory)
+    contents: \*
 
 # Set the number of the build
 - task: PowerShell@2
