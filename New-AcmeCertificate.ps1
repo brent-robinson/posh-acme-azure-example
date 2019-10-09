@@ -17,7 +17,7 @@ $workingDirectory = Join-Path -Path "." -ChildPath "pa"
 New-Item -Path $workingDirectory -ItemType Directory | Out-Null
 
 # Sync contents of storage container to working directory
-./azcopy sync "$StorageContainerSASToken" "$workingDirectory"
+azcopy sync "$StorageContainerSASToken" "$workingDirectory"
 
 # Set Posh-ACME working directory
 $env:POSHACME_HOME = $workingDirectory
@@ -41,4 +41,4 @@ $pArgs = @{ CFTokenInsecure = $CloudFlareAPIToken }
 New-PACertificate -Domain $CertificateNamesArr -DnsPlugin Cloudflare -PluginArgs $pArgs
 
 # Sync working directory back to storage container
-./azcopy sync "$workingDirectory" "$StorageContainerSASToken"
+azcopy sync "$workingDirectory" "$StorageContainerSASToken"
