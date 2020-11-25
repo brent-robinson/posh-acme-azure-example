@@ -18,7 +18,8 @@ Remove-Item $workingDirectory -Recurse -ErrorAction Ignore
 New-Item -Path $workingDirectory -ItemType Directory | Out-Null
 
 # Sync contents of storage container to working directory
-azcopy sync "$StorageContainerSASToken" "$workingDirectory"
+# MSFT Hosted Ubuntu defaults to azcopy v 7 if alias azcopy10 is not specified
+azcopy10 sync "$StorageContainerSASToken" "$workingDirectory"
 
 # Set Posh-ACME working directory
 $env:POSHACME_HOME = $workingDirectory
@@ -42,4 +43,4 @@ $pArgs = @{ CFTokenInsecure = $CloudFlareAPIToken }
 New-PACertificate -Domain $CertificateNamesArr -DnsPlugin Cloudflare -PluginArgs $pArgs
 
 # Sync working directory back to storage container
-azcopy sync "$workingDirectory" "$StorageContainerSASToken"
+azcopy10 sync "$workingDirectory" "$StorageContainerSASToken"

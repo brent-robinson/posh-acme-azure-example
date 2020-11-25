@@ -1,12 +1,44 @@
 name: 0.0.$(Build.BuildId)
 
 # Linux based agent; all except the first step will also work on Windows
-pool: "Self-Hosted Ubuntu"
+pool:
+  vmImage: 'ubuntu-18.04'
 
 # The scheduled trigger will be set in the Azure DevOps portal
 trigger: none
 
+variables:
+  # Default to staging
+    letsEncryptUrl: 'https://acme-staging-v02.api.letsencrypt.org/directory'
+    letsEncryptHostname: 'acme-staging-v02.api.letsencrypt.org'
+
 steps:
+
+- task: Bash@3
+  displayName: "Change LetsEncrypt URLs/file paths if isProd is true (case sensitive)"
+  condition: eq(variables['isProd'], 'true')
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo '##vso[task.setvariable variable=letsEncryptUrl]https://acme-v02.api.letsencrypt.org/directory'
+      echo '##vso[task.setvariable variable=letsEncryptHostname]acme-staging-v02.api.letsencrypt.org'
+
+
+- task: Bash@3
+  displayName: "Split out hostname used in filepath"
+  inputs:
+    targetType: 'inline'
+    script: |
+      FIRST_HOST=$(echo $CERTIFICATENAMES | cut -d ',' -f1)
+      echo "The name that will be used for parsing the file path is: $FIRST_HOST"
+      echo "##vso[task.setvariable variable=hostNameFilePath]$FIRST_HOST"
+  
+- task: PowerShell@2
+  displayName: Install Posh-ACME Cmdlet between v 3.16 and 3.18.1
+  inputs:
+    targetType: 'inline'
+    script: |
+      Install-Module Posh-ACME -Force -AllowClobber -MinimumVersion '3.16.0' -MaximumVersion '3.18.1'
 
 - task: DeleteFiles@1
   inputs:
@@ -27,7 +59,7 @@ steps:
     azureSubscription: 'ACME Certificate Automation'
     scriptType: 'FilePath'
     scriptPath: 'New-AcmeCertificate.ps1 '
-    scriptArguments: '-AcmeDirectory "$(AcmeDirectory)" -AcmeContact "$(AcmeContact)" -CertificateNames "$(CertificateNames)" -StorageContainerSASToken "$(StorageContainerSASToken)" -CloudFlareApiToken "$(CloudFlareAPIToken)"'
+    scriptArguments: '-AcmeDirectory "$(letsEncryptUrl)" -AcmeContact "$(AcmeContact)" -CertificateNames "$(CertificateNames)" -StorageContainerSASToken "$(StorageContainerSASToken)" -CloudFlareApiToken "$(CloudFlareAPIToken)"'
     errorActionPreference: 'stop'
     failOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
@@ -44,3 +76,34 @@ steps:
     failOnStandardError: true
     azurePowerShellVersion: 'LatestVersion'
   condition: "and(succeeded(), ne(variables['KeyVaultResourceId'], ''))"
+
+# Copy intermediate certificates and publish as part of this build for inclusion. 
+- task: CopyFiles@2
+  displayName: Copy appropriate chain*.cer files to staging dir
+  inputs:
+    Contents: '**/$(letsEncryptHostname)/**/$(hostNameFilePath)/**/chain*.cer'
+    TargetFolder: $(Build.ArtifactStagingDirectory)
+    CleanTargetFolder: true
+    flattenFolders: true
+
+- task: ArchiveFiles@2
+  displayName: Zip em!
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$DevAuthCacerts.zip'
+    replaceExistingArchive: true
+
+- task: DeleteFiles@1
+  displayName: Delete cer files in staging directory leaving the zip
+  inputs:
+    SourceFolder: '$(Build.ArtifactStagingDirectory)'
+    Contents: '*.cer'
+
+# Publish those intermediate certificates
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'letsEncryptCAs'
+    publishLocation: 'Container'
