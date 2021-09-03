@@ -11,7 +11,8 @@ schedules:
     - trunk
 
 stages:
-- stage: okta-preview
+- stage: okta_preview
+  displayName: Okta Preview
   jobs:
   - deployment:
     displayName: Update Okta
@@ -40,6 +41,7 @@ stages:
                 ./update-okta.sh
 
 - stage: okta
+  displayName: Okta
   jobs:
   - deployment:
     displayName: Update Okta
