@@ -43,7 +43,7 @@ stages:
   jobs:
   - deployment:
     displayName: Update Okta
-    environment: Production - Platform
+    environment: Okta
     variables:
     - group: Okta
     strategy:
