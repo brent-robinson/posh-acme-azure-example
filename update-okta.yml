@@ -51,11 +51,18 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - bash: ./update-okta.sh
-            env:
-            - VAULT_NAME: hv-prd-001-kv-ops-01
-            - CERT_NAME: auth-homevalet-co
-            - OKTA_API_TOKEN: $(OktaApiToken)
-            - OKTA_ORG_NAME: homevalet
-            - OKTA_BASE_URL: okta.com
-            - OKTA_CUSTOM_AUTH_HOSTNAME: auth.homevalet.co
+          - task: AzureCLI@2
+            displayName: Update Okta
+            inputs:
+              azureSubscription: Azure Production Subscription with SP Connection # TODO: This needs to change eventually
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |  
+                export VAULT_NAME=hv-prd-001-kv-ops-01
+                export CERT_NAME=auth-homevalet-co
+                export OKTA_API_TOKEN=$(OktaApiToken)
+                export OKTA_ORG_NAME=homevalet
+                export OKTA_BASE_URL=okta.com
+                export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.co
+
+                ./update-okta.sh
