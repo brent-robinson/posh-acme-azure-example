@@ -32,7 +32,7 @@ stages:
               inlineScript: |  
                 export VAULT_NAME=hv-dev-001-kv-ops-01
                 export CERT_NAME=auth-homevalet-dev
-                export OKTA_API_TOKEN=${{ variables.OktaApiToken }}
+                export OKTA_API_TOKEN=$(OktaApiToken)
                 export OKTA_ORG_NAME=homevalet
                 export OKTA_BASE_URL=oktapreview.com
                 export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.dev
