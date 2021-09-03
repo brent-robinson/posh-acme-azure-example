@@ -4,7 +4,7 @@
 #
 # Requires Env Vars:
 #   
-#   VAULT_NAME - The name of the key vault (e.g., `hv-dev-001-kv-ops-001`)
+#   VAULT_NAME - The name of the key vault (e.g., `hv-dev-001-kv-ops-01`)
 #   CERT_NAME - The name of the certificate in key vault (e.g., `auth-homevalet-dev`)
 #   OKTA_ORG_NAME - The name of the Okta org (e.g., `homevalet`)
 #   OKTA_API_TOKEN - The Okta token to use for updating (see <https://developer.okta.com/docs/guides/create-an-api-token/create-the-token/>)
@@ -38,7 +38,7 @@ echo searching for $OKTA_CUSTOM_AUTH_HOSTNAME
 DOMAINS=$(curl -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: SSWS $OKTA_API_TOKEN" "https://$OKTA_ORG_NAME.$OKTA_BASE_URL/api/v1/domains")
 echo $DOMAINS
 DOMAIN_ID=$(echo $DOMAINS | jq -r '.domains[] | select(.domain==env.OKTA_CUSTOM_AUTH_HOSTNAME).id')
-if [ "$DOMAIN_ID" == ""]; then
+if [ "$DOMAIN_ID" == "" ]; then
     echo "domain not found!"
     exit 1
 fi
