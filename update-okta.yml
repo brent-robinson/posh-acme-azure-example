@@ -1,0 +1,56 @@
+pool:
+  vmImage: 'ubuntu-20.04'
+
+triger: okta-integration # trunk
+pr: none
+schedules:
+- cron: '0 2 * * *' # Everyday at 2am (Certs run at 1am)
+  branches:
+    include:
+    - trunk
+
+stages:
+- stage: dev
+  jobs:
+  - deployment:
+    displayName: Update Okta
+    environment: Development - Platform
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: Update Okta
+            inputs:
+              azureSubscription: devops-pipeline-service-connector # TODO: This needs to change eventually
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |  
+                VAULT_NAME=hv-dev-001-kv-ops-01
+                CERT_NAME=auth-homevalet-dev
+                OKTA_API_TOKEN=${{ variables.OktaApiToken }}
+                OKTA_ORG_NAME=homevalet
+                OKTA_BASE_URL=oktapreview.com
+                OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.dev
+                
+                ./update-okta.sh
+
+# - stage: prod
+#   jobs:
+#   - deployment:
+#     displayName: Update Okta
+#     environment: Production - Platform
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - checkout: self
+#           - bash: ./update-okta.sh
+#             env:
+#             - VAULT_NAME: hv-prd-001-kv-ops-01
+#             - CERT_NAME: auth-homevalet-co
+#             - OKTA_API_TOKEN: $(OktaApiToken)
+#             - OKTA_ORG_NAME: homevalet
+#             - OKTA_BASE_URL: okta.com
+#             - OKTA_CUSTOM_AUTH_HOSTNAME: auth.homevalet.co
