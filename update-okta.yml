@@ -4,7 +4,7 @@ pool:
 trigger: none
 pr: none
 schedules:
-- cron: '0 2 * * *' # Everyday at 2am (Certs run at 1am)
+- cron: '0 3 * * *' # Everyday at 3am (Certs run at 2am)
   branches:
     include:
     - trunk
