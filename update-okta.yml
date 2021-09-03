@@ -16,6 +16,8 @@ stages:
   - deployment:
     displayName: Update Okta
     environment: Development - Platform
+    variables:
+    - group: Okta-Dev
     strategy:
       runOnce:
         deploy:
