@@ -15,7 +15,7 @@ stages:
   jobs:
   - deployment:
     displayName: Update Okta
-    environment: Development - Platform
+    environment: Preview - Okta
     variables:
     - group: Okta-Dev
     strategy:
@@ -45,7 +45,7 @@ stages:
     displayName: Update Okta
     environment: Production - Platform
     variables:
-    - group: Okta-Prd
+    - group: Okta
     strategy:
       runOnce:
         deploy:
