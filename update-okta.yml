@@ -1,8 +1,7 @@
 pool:
   vmImage: 'ubuntu-20.04'
 
-trigger: 
-- okta-integration # trunk
+trigger: none
 pr: none
 schedules:
 - cron: '0 2 * * *' # Everyday at 2am (Certs run at 1am)
