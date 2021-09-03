@@ -1,7 +1,7 @@
 pool:
   vmImage: 'ubuntu-20.04'
 
-triger: okta-integration # trunk
+trigger: okta-integration # trunk
 pr: none
 schedules:
 - cron: '0 2 * * *' # Everyday at 2am (Certs run at 1am)
@@ -33,7 +33,7 @@ stages:
                 OKTA_ORG_NAME=homevalet
                 OKTA_BASE_URL=oktapreview.com
                 OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.dev
-                
+
                 ./update-okta.sh
 
 # - stage: prod
