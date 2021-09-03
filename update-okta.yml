@@ -39,21 +39,23 @@ stages:
 
                 ./update-okta.sh
 
-# - stage: prod
-#   jobs:
-#   - deployment:
-#     displayName: Update Okta
-#     environment: Production - Platform
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - checkout: self
-#           - bash: ./update-okta.sh
-#             env:
-#             - VAULT_NAME: hv-prd-001-kv-ops-01
-#             - CERT_NAME: auth-homevalet-co
-#             - OKTA_API_TOKEN: $(OktaApiToken)
-#             - OKTA_ORG_NAME: homevalet
-#             - OKTA_BASE_URL: okta.com
-#             - OKTA_CUSTOM_AUTH_HOSTNAME: auth.homevalet.co
+- stage: prod
+  jobs:
+  - deployment:
+    displayName: Update Okta
+    environment: Production - Platform
+    variables:
+    - group: Okta-Prd
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - bash: ./update-okta.sh
+            env:
+            - VAULT_NAME: hv-prd-001-kv-ops-01
+            - CERT_NAME: auth-homevalet-co
+            - OKTA_API_TOKEN: $(OktaApiToken)
+            - OKTA_ORG_NAME: homevalet
+            - OKTA_BASE_URL: okta.com
+            - OKTA_CUSTOM_AUTH_HOSTNAME: auth.homevalet.co
