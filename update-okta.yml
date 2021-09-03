@@ -17,7 +17,7 @@ stages:
     displayName: Update Okta
     environment: Preview - Okta
     variables:
-    - group: Okta-Dev
+    - group: Okta-Preview
     strategy:
       runOnce:
         deploy:
