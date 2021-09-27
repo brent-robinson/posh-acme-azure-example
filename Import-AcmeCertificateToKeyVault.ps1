@@ -14,10 +14,10 @@ $workingDirectory = Join-Path -Path "." -ChildPath "pa"
 
 # Set Posh-ACME working directory
 $env:POSHACME_HOME = $workingDirectory
-Import-Module -Name Posh-ACME -Force
+Import-Module -Name Posh-ACME
 
 # Resolve the details of the certificate
-$currentServerName = ((Get-PAServer).location) -split "/" | Where-Object -FilterScript { $_ } | Select-Object -Skip 1 -First 1
+$currentServerName = ((Get-PAServer).Name)
 $currentAccountName = (Get-PAAccount).id
 
 # Determine paths to resources
