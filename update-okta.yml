@@ -26,7 +26,7 @@ stages:
           - task: AzureCLI@2
             displayName: Update Okta
             inputs:
-              azureSubscription: devops-pipeline-service-connector # TODO: This needs to change eventually
+              azureSubscription: Azure - HomeValet Platform Non-Production
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |  
@@ -55,7 +55,7 @@ stages:
           - task: AzureCLI@2
             displayName: Update Okta
             inputs:
-              azureSubscription: Azure Production Subscription with SP Connection # TODO: This needs to change eventually
+              azureSubscription: Azure - HomeValet Platform Production
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |  
