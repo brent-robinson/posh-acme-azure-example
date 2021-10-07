@@ -23,7 +23,6 @@ pr: none
 
 stages:
 - stage: validate
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   jobs:
   - job: validate
     steps:
