@@ -23,7 +23,7 @@ pr: none
 
 stages:
 - stage: validate
-  condition: not(and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   jobs:
   - job: validate
     steps:
