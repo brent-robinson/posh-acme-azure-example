@@ -22,14 +22,14 @@ trigger: none
 pr: none
 
 stages:
-# - stage: validate
-#   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
-#   jobs:
-#   - job: validate
-#     steps:
-#     - bash: echo Pipeline syntax is valid
+- stage: validate
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - job: validate
+    steps:
+    - bash: echo Pipeline syntax is valid
 - stage: dev
-  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  condition: ne(variables['Build.Reason'], 'PullRequest')
   jobs:
   - deployment: auth_oktaPreview
     displayName: auth.homevalet.dev
