@@ -40,7 +40,7 @@ stages:
           - template: acme-update-steps.yml
   - deployment: wildcard_dev
     displayName: homevalet.dev,*.homevalet.dev
-    environment: Development - Platform
+    environment: Operations
     variables:
     - group: LetsEncryptStorageSAS - Dev
     - name: CertificateNames
@@ -70,7 +70,7 @@ stages:
           - template: acme-update-steps.yml
   - deployment: wildcard_prd
     displayName: homevalet.co,*.homevalet.co
-    environment: Production - Platform
+    environment: Operations
     variables:
     - group: LetsEncryptStorageSAS - Prod
     - name: CertificateNames
