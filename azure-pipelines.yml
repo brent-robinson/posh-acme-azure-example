@@ -24,7 +24,7 @@ pr: none
 stages:
 - stage: dev
   jobs:
-  - deployment: auth-oktaPreview
+  - deployment: auth_oktaPreview
     displayName: auth.homevalet.dev
     environment: Preview - Okta
     variables:
@@ -38,7 +38,7 @@ stages:
         deploy:
           steps:
           - template: acme-update-steps.yml
-  - deployment: wildcard-dev
+  - deployment: wildcard_dev
     displayName: homevalet.dev,*.homevalet.dev
     environment: Development - Platform
     variables:
@@ -54,7 +54,7 @@ stages:
           - template: acme-update-steps.yml
 - stage: prd
   jobs:
-  - deployment: auth-prd
+  - deployment: auth_prd
     displayName: auth.homevalet.co
     environment: Okta
     variables:
@@ -68,7 +68,7 @@ stages:
         deploy:
           steps:
           - template: acme-update-steps.yml
-  - deployment: wildcard-prd
+  - deployment: wildcard_prd
     displayName: homevalet.co,*.homevalet.co
     environment: Production - Platform
     variables:
