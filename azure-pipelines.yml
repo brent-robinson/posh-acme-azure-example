@@ -23,13 +23,13 @@ pr: none
 
 stages:
 - stage: validate
-  condition: not(and(succeeded(), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'trunk'))))
+  condition: not(and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
   jobs:
   - job: validate
     steps:
     - bash: echo Pipeline syntax is valid
 - stage: dev
-  condition: and(succeeded(), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'trunk')))
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
   jobs:
   - deployment: auth_oktaPreview
     displayName: auth.homevalet.dev
@@ -60,7 +60,7 @@ stages:
           steps:
           - template: acme-update-steps.yml
 - stage: okta_preview
-  condition: and(succeeded(), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'trunk')))
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
   jobs:
   - deployment:
     displayName: Update Okta Preview
@@ -88,7 +88,7 @@ stages:
 
                 ./update-okta.sh
 - stage: prd
-  condition: and(succeeded(), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'trunk')))
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
   jobs:
   - deployment: auth_prd
     displayName: auth.homevalet.co
@@ -119,7 +119,7 @@ stages:
           steps:
           - template: acme-update-steps.yml
 - stage: okta
-  condition: and(succeeded(), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'trunk')))
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')))
   jobs:
   - deployment:
     displayName: Update Okta
