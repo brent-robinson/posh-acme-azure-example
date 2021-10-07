@@ -29,7 +29,7 @@ stages:
     displayName: auth.homevalet.dev
     environment: Preview - Okta
     variables:
-    - group: LetsEncryptStorageSAS - Dev
+    - group: 'LetsEncryptStorageSAS - Dev'
     - name: CertificateNames
       value: auth.homevalet.dev
     - name: KeyVaultResourceId
@@ -43,7 +43,7 @@ stages:
     displayName: homevalet.dev,*.homevalet.dev
     environment: Development - Platform
     variables:
-    - group: LetsEncryptStorageSAS - Dev
+    - group: 'LetsEncryptStorageSAS - Dev'
     - name: CertificateNames
       value: homevalet.dev,*.homevalet.dev
     - name: KeyVaultResourceId
@@ -59,7 +59,7 @@ stages:
     displayName: auth.homevalet.co
     environment: Okta
     variables:
-    - group: LetsEncryptStorageSAS - Prod
+    - group: 'LetsEncryptStorageSAS - Prod'
     - name: CertificateNames
       value: auth.homevalet.co
     - name: KeyVaultResourceId
@@ -73,7 +73,7 @@ stages:
     displayName: homevalet.co,*.homevalet.co
     environment: Production - Platform
     variables:
-    - group: LetsEncryptStorageSAS - Prod
+    - group: 'LetsEncryptStorageSAS - Prod'
     - name: CertificateNames
       value: homevalet.co,*.homevalet.co
     - name: KeyVaultResourceId
