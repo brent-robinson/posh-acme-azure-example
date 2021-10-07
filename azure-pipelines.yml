@@ -19,7 +19,6 @@ schedules:
     - trunk
 
 trigger: none
-pr: none
 
 stages:
 - stage: validate
