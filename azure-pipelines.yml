@@ -59,35 +59,34 @@ stages:
         deploy:
           steps:
           - template: acme-update-steps.yml
-# - stage: okta_preview
-#   condition: and(succeeded(), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'trunk')))
-#   jobs:
-#   - deployment:
-#     dependsOn: auth_oktaPreview
-#     displayName: Update Okta Preview
-#     environment: Preview - Okta
-#     variables:
-#     - group: Okta-Preview
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - checkout: self
-#           - task: AzureCLI@2
-#             displayName: Update Okta
-#             inputs:
-#               azureSubscription: Azure - HomeValet Platform Non-Production
-#               scriptType: bash
-#               scriptLocation: inlineScript
-#               inlineScript: |  
-#                 export VAULT_NAME=hv-dev-001-kv-ops-01
-#                 export CERT_NAME=auth-homevalet-dev
-#                 export OKTA_API_TOKEN=$(OktaApiToken)
-#                 export OKTA_ORG_NAME=homevalet
-#                 export OKTA_BASE_URL=oktapreview.com
-#                 export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.dev
+- stage: okta_preview
+  condition: and(succeeded(), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'trunk')))
+  jobs:
+  - deployment:
+    displayName: Update Okta Preview
+    environment: Preview - Okta
+    variables:
+    - group: Okta-Preview
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: Update Okta
+            inputs:
+              azureSubscription: Azure - HomeValet Platform Non-Production
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |  
+                export VAULT_NAME=hv-dev-001-kv-ops-01
+                export CERT_NAME=auth-homevalet-dev
+                export OKTA_API_TOKEN=$(OktaApiToken)
+                export OKTA_ORG_NAME=homevalet
+                export OKTA_BASE_URL=oktapreview.com
+                export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.dev
 
-#                 ./update-okta.sh
+                ./update-okta.sh
 - stage: prd
   condition: and(succeeded(), and(ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranchName'], 'trunk')))
   jobs:
