@@ -1,109 +1,146 @@
 name: 0.0.$(Build.BuildId)
 
-# Linux based agent; all except the first step will also work on Windows
 pool:
   vmImage: 'ubuntu-20.04'
 
-# The scheduled trigger will be set in the Azure DevOps portal
+variables:
+- name: letsEncryptUrl
+  value: https://acme-v02.api.letsencrypt.org/directory
+- name: letsEncryptHostname
+  value: acme-v02.api.letsencrypt.org
+- name: AcmeContact
+  value: tim@homevalet.co
+- group: Cloudflare
+
+schedules:
+- cron: '0 2 * * *' # Everyday at 2am (Okta upload runs at 3am)
+  branches:
+    include:
+    - trunk
+
 trigger: none
 
-variables:
-  # Default to staging
-    letsEncryptUrl: 'https://acme-staging-v02.api.letsencrypt.org/directory'
-    letsEncryptHostname: 'acme-staging-v02.api.letsencrypt.org'
+stages:
+- stage: validate
+  jobs:
+  - job: validate
+    steps:
+    - bash: echo Pipeline syntax is valid
+- stage: dev
+  condition: ne(variables['Build.Reason'], 'PullRequest')
+  jobs:
+  - deployment: auth_oktaPreview
+    displayName: auth.homevalet.dev
+    environment: Preview - Okta
+    variables:
+    - group: LetsEncryptStorageSAS - Dev
+    - name: CertificateNames
+      value: auth.homevalet.dev
+    - name: KeyVaultResourceId
+      value: /subscriptions/fde10e22-fd9d-46b2-8198-b30540d5c76d/resourceGroups/hv-dev-ops/providers/Microsoft.KeyVault/vaults/hv-dev-001-kv-ops-01
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: acme-update-steps.yml
+  - deployment: wildcard_dev
+    displayName: homevalet.dev,*.homevalet.dev
+    environment: Operations
+    variables:
+    - group: LetsEncryptStorageSAS - Dev
+    - name: CertificateNames
+      value: homevalet.dev,*.homevalet.dev
+    - name: KeyVaultResourceId
+      value: /subscriptions/fde10e22-fd9d-46b2-8198-b30540d5c76d/resourceGroups/hv-dev-ops/providers/Microsoft.KeyVault/vaults/hv-dev-001-kv-ops-01
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: acme-update-steps.yml
+- stage: okta_preview
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - deployment:
+    displayName: Update Okta Preview
+    environment: Preview - Okta
+    variables:
+    - group: Okta-Preview
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: Update Okta
+            inputs:
+              azureSubscription: Azure - HomeValet Platform Non-Production
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |  
+                export VAULT_NAME=hv-dev-001-kv-ops-01
+                export CERT_NAME=auth-homevalet-dev
+                export OKTA_API_TOKEN=$(OktaApiToken)
+                export OKTA_ORG_NAME=homevalet
+                export OKTA_BASE_URL=oktapreview.com
+                export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.dev
 
-steps:
+                ./update-okta.sh
+- stage: prd
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - deployment: auth_prd
+    displayName: auth.homevalet.co
+    environment: Okta
+    variables:
+    - group: LetsEncryptStorageSAS - Prod
+    - name: CertificateNames
+      value: auth.homevalet.co
+    - name: KeyVaultResourceId
+      value: /subscriptions/5231ee57-0984-4eda-8e8e-81cae16a67a4/resourceGroups/hv-prd-ops/providers/Microsoft.KeyVault/vaults/hv-prd-001-kv-ops-01
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: acme-update-steps.yml
+  - deployment: wildcard_prd
+    displayName: homevalet.co,*.homevalet.co
+    environment: Operations
+    variables:
+    - group: LetsEncryptStorageSAS - Prod
+    - name: CertificateNames
+      value: homevalet.co,*.homevalet.co
+    - name: KeyVaultResourceId
+      value: /subscriptions/5231ee57-0984-4eda-8e8e-81cae16a67a4/resourceGroups/hv-prd-ops/providers/Microsoft.KeyVault/vaults/hv-prd-001-kv-ops-01
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: acme-update-steps.yml
+- stage: okta
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - deployment:
+    displayName: Update Okta
+    environment: Okta
+    variables:
+    - group: Okta
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: Update Okta
+            inputs:
+              azureSubscription: Azure - HomeValet Platform Production
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |  
+                export VAULT_NAME=hv-prd-001-kv-ops-01
+                export CERT_NAME=auth-homevalet-co
+                export OKTA_API_TOKEN=$(OktaApiToken)
+                export OKTA_ORG_NAME=homevalet
+                export OKTA_BASE_URL=okta.com
+                export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.co
 
-- task: Bash@3
-  displayName: "Change LetsEncrypt URLs/file paths if isProd is true (case sensitive)"
-  condition: eq(variables['isProd'], 'true')
-  inputs:
-    targetType: 'inline'
-    script: |
-      echo '##vso[task.setvariable variable=letsEncryptUrl]https://acme-v02.api.letsencrypt.org/directory'
-      echo '##vso[task.setvariable variable=letsEncryptHostname]acme-v02.api.letsencrypt.org'
-
-
-- task: Bash@3
-  displayName: "Split out hostname used in filepath"
-  inputs:
-    targetType: 'inline'
-    script: |
-      FIRST_HOST=$(echo $CERTIFICATENAMES | cut -d ',' -f1)
-      echo "The name that will be used for parsing the file path is: $FIRST_HOST"
-      echo "##vso[task.setvariable variable=hostNameFilePath]$FIRST_HOST"
-  
-- task: PowerShell@2
-  displayName: Install Posh-ACME Cmdlet between v 3.16 and 3.18.1
-  inputs:
-    targetType: 'inline'
-    script: |
-      Install-Module Posh-ACME -Force -AllowClobber -MinimumVersion '3.16.0' -MaximumVersion '3.18.1'
-
-- task: DeleteFiles@1
-  inputs:
-    sourceFolder: $(Agent.BuildDirectory)
-    contents: \*
-
-# Set the number of the build
-- task: PowerShell@2
-  displayName: Update Build Number
-  inputs:
-    targetType: 'inline'
-    script: '$id = "$(Build.BuildId)"; $date = Get-Date -Format "yyyy.MMdd"; Write-Host "##vso[build.updatebuildnumber]$date.$id"'
-
-# Order or renew a certificate via ACME
-- task: AzurePowerShell@4
-  displayName: Order or Renew Certificate
-  inputs:
-    azureSubscription: 'ACME Certificate Automation'
-    scriptType: 'FilePath'
-    scriptPath: 'New-AcmeCertificate.ps1 '
-    scriptArguments: '-AcmeDirectory "$(letsEncryptUrl)" -AcmeContact "$(AcmeContact)" -CertificateNames "$(CertificateNames)" -StorageContainerSASToken "$(StorageContainerSASToken)" -CloudFlareApiToken "$(CloudFlareAPIToken)"'
-    errorActionPreference: 'stop'
-    failOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-
-# Import the certificate into Azure Key Vault
-- task: AzurePowerShell@4
-  displayName: Import Certificate into Key Vault
-  inputs:
-    azureSubscription: 'ACME Certificate Automation'
-    scriptType: 'FilePath'
-    scriptPath: 'Import-AcmeCertificateToKeyVault.ps1 '
-    scriptArguments: '-CertificateNames "$(CertificateNames)" -KeyVaultResourceId "$(KeyVaultResourceId)"'
-    errorActionPreference: 'stop'
-    failOnStandardError: true
-    azurePowerShellVersion: 'LatestVersion'
-  condition: "and(succeeded(), ne(variables['KeyVaultResourceId'], ''))"
-
-# Copy intermediate certificates and publish as part of this build for inclusion. 
-- task: CopyFiles@2
-  displayName: Copy appropriate chain*.cer files to staging dir
-  inputs:
-    Contents: '**/$(letsEncryptHostname)/**/$(hostNameFilePath)/**/chain*.cer'
-    TargetFolder: $(Build.ArtifactStagingDirectory)
-    CleanTargetFolder: true
-    flattenFolders: true
-
-- task: ArchiveFiles@2
-  displayName: Zip em!
-  inputs:
-    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$DevAuthCacerts.zip'
-    replaceExistingArchive: true
-
-- task: DeleteFiles@1
-  displayName: Delete cer files in staging directory leaving the zip
-  inputs:
-    SourceFolder: '$(Build.ArtifactStagingDirectory)'
-    Contents: '*.cer'
-
-# Publish those intermediate certificates
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'letsEncryptCAs'
-    publishLocation: 'Container'
+                ./update-okta.sh
