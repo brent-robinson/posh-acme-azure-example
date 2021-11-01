@@ -32,7 +32,7 @@ Set-PAServer -DirectoryUrl $AcmeDirectory
 $account = Get-PAAccount
 if (-not $account) {
     # New account
-    $account = New-PAAccount -Contact $AcmeContact -AcceptTOS
+    $account = New-PAAccount -Contact $AcmeContact -AcceptTOS -Force
 }
 elseif ($account.contact -ne "mailto:$AcmeContact") {
     # Update account contact
