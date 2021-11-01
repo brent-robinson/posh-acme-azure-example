@@ -9,7 +9,7 @@ variables:
 - name: letsEncryptHostname
   value: acme-v02.api.letsencrypt.org
 - name: AcmeContact
-  value: tim@homevalet.co
+  value: security@homevalet.co
 - group: Cloudflare
 
 schedules:
