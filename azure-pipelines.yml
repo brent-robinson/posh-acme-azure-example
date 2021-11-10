@@ -17,6 +17,7 @@ schedules:
   branches:
     include:
     - trunk
+  always: true
 
 trigger: none
 
