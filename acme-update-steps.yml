@@ -60,7 +60,7 @@ steps:
     Contents: '**/$(letsEncryptHostname)/**/$(hostNameFilePath)/**/chain*.cer'
     TargetFolder: $(Build.ArtifactStagingDirectory)
     CleanTargetFolder: true
-    flattenFolders: true
+    flattenFolders: false
 
 - task: ArchiveFiles@2
   displayName: Zip em!
@@ -75,7 +75,7 @@ steps:
   displayName: Delete cer files in staging directory leaving the zip
   inputs:
     SourceFolder: '$(Build.ArtifactStagingDirectory)'
-    Contents: '*.cer'
+    Contents: '**/*.cer'
 
 # Publish those intermediate certificates
 - task: PublishBuildArtifacts@1
