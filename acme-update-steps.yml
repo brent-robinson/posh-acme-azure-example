@@ -60,7 +60,7 @@ steps:
     Contents: '**/$(letsEncryptHostname)/**/$(hostNameFilePath)/**/chain*.cer'
     TargetFolder: $(Build.ArtifactStagingDirectory)
     CleanTargetFolder: true
-    flattenFolders: true
+    flattenFolders: false
 
 - task: ArchiveFiles@2
   displayName: Zip em!
