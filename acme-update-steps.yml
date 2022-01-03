@@ -75,7 +75,7 @@ steps:
   displayName: Delete cer files in staging directory leaving the zip
   inputs:
     SourceFolder: '$(Build.ArtifactStagingDirectory)'
-    Contents: '*.cer'
+    Contents: '**/*.cer'
 
 # Publish those intermediate certificates
 - task: PublishBuildArtifacts@1
