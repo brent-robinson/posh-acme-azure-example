@@ -1,8 +1,11 @@
 name: 0.0.$(Build.BuildId)
 
 # Linux based agent; all except the first step will also work on Windows
-queue:
-  name: Hosted Ubuntu 1604
+pool:
+  vmImage: ubuntu-18.04
+
+#queue:
+#  name: ubuntu-1804
 
 # The scheduled trigger will be set in the Azure DevOps portal
 trigger: none
@@ -23,12 +26,22 @@ steps:
     targetType: 'inline'
     script: 'wget https://azcopyvnext.azureedge.net/release20190301/azcopy_linux_amd64_10.0.8.tar.gz && tar xvzf ./azcopy_linux_amd64_10.0.8.tar.gz && rm ./azcopy_linux_amd64_10.0.8.tar.gz && cp ./azcopy_linux_amd64_10.0.8/azcopy ./ && rm -rf ./azcopy_linux_amd64_10.0.8 && ./azcopy --version'
 
-# Install the Az PowerShell modules our script will need
+# Install the Azure PowerShell modules our script will need
 - task: PowerShell@2
-  displayName: Install PowerShell Modules (Az.Accounts, Az.KeyVault, Az.Resources, Posh-ACME)
+  displayName: Install Azure PowerShell Modules
   inputs:
     targetType: 'inline'
-    script: 'Install-Module Az.Accounts, Az.KeyVault, Az.Resources, Posh-ACME -Force'
+    script: 'Install-Module Az.Accounts, Az.KeyVault, Az.Resources -Force'
+    errorActionPreference: 'stop'
+    failOnStderr: true
+    pwsh: true
+
+# Install the Posh-ACME PowerShell modules our script will need
+- task: PowerShell@2
+  displayName: Install Posh-ACME PowerShell Module
+  inputs:
+    targetType: 'inline'
+    script: 'Install-Module -Name Posh-ACME -Force'
     errorActionPreference: 'stop'
     failOnStderr: true
     pwsh: true
