@@ -13,6 +13,9 @@ $CertificateNamesArr = $CertificateNames.Replace(',',';') -split ';' | ForEach-O
 
 # Create working directory
 $workingDirectory = Join-Path -Path "." -ChildPath "pa"
+if (Test-Path $workingDirectory) {
+	Remove-Item $workingDirectory -Recurse
+}
 New-Item -Path $workingDirectory -ItemType Directory | Out-Null
 
 # Sync contents of storage container to working directory
