@@ -10,11 +10,11 @@ steps:
       echo "##vso[task.setvariable variable=hostNameFilePath]$FIRST_HOST"
   
 - task: PowerShell@2
-  displayName: Install Posh-ACME Cmdlet between v 3.16 and 3.18.1
+  displayName: Install Posh-ACME Cmdlet v4
   inputs:
     targetType: 'inline'
     script: |
-      Install-Module Posh-ACME -Force -AllowClobber -MinimumVersion '3.16.0' -MaximumVersion '3.18.1'
+      Install-Module Posh-ACME -Force -AllowClobber -MinimumVersion '4.11.0' -MaximumVersion '4.99.0'
 
 - task: DeleteFiles@1
   inputs:
