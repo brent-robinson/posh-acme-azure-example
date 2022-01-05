@@ -28,7 +28,7 @@ stages:
     steps:
     - bash: echo Pipeline syntax is valid
 - stage: dev
-  # condition: ne(variables['Build.Reason'], 'PullRequest')
+  condition: ne(variables['Build.Reason'], 'PullRequest')
   jobs:
   - deployment: auth_oktaPreview
     displayName: auth.homevalet.dev
@@ -44,104 +44,104 @@ stages:
         deploy:
           steps:
           - template: acme-update-steps.yml
-  # - deployment: wildcard_dev
-  #   displayName: homevalet.dev,*.homevalet.dev
-  #   environment: Operations
-  #   variables:
-  #   - group: LetsEncryptStorageSAS - Dev
-  #   - name: CertificateNames
-  #     value: homevalet.dev,*.homevalet.dev
-  #   - name: KeyVaultResourceId
-  #     value: /subscriptions/fde10e22-fd9d-46b2-8198-b30540d5c76d/resourceGroups/hv-dev-ops/providers/Microsoft.KeyVault/vaults/hv-dev-001-kv-ops-01
-  #   strategy:
-  #     runOnce:
-  #       deploy:
-  #         steps:
-  #         - template: acme-update-steps.yml
-# - stage: okta_preview
-#   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-#   jobs:
-#   - deployment:
-#     displayName: Update Okta Preview
-#     environment: Preview - Okta
-#     variables:
-#     - group: Okta-Preview
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - checkout: self
-#           - task: AzureCLI@2
-#             displayName: Update Okta
-#             inputs:
-#               azureSubscription: Azure - HomeValet Platform Non-Production
-#               scriptType: bash
-#               scriptLocation: inlineScript
-#               inlineScript: |  
-#                 export VAULT_NAME=hv-dev-001-kv-ops-01
-#                 export CERT_NAME=auth-homevalet-dev
-#                 export OKTA_API_TOKEN=$(OktaApiToken)
-#                 export OKTA_ORG_NAME=homevalet
-#                 export OKTA_BASE_URL=oktapreview.com
-#                 export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.dev
+  - deployment: wildcard_dev
+    displayName: homevalet.dev,*.homevalet.dev
+    environment: Operations
+    variables:
+    - group: LetsEncryptStorageSAS - Dev
+    - name: CertificateNames
+      value: homevalet.dev,*.homevalet.dev
+    - name: KeyVaultResourceId
+      value: /subscriptions/fde10e22-fd9d-46b2-8198-b30540d5c76d/resourceGroups/hv-dev-ops/providers/Microsoft.KeyVault/vaults/hv-dev-001-kv-ops-01
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: acme-update-steps.yml
+- stage: okta_preview
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - deployment:
+    displayName: Update Okta Preview
+    environment: Preview - Okta
+    variables:
+    - group: Okta-Preview
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: Update Okta
+            inputs:
+              azureSubscription: Azure - HomeValet Platform Non-Production
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |  
+                export VAULT_NAME=hv-dev-001-kv-ops-01
+                export CERT_NAME=auth-homevalet-dev
+                export OKTA_API_TOKEN=$(OktaApiToken)
+                export OKTA_ORG_NAME=homevalet
+                export OKTA_BASE_URL=oktapreview.com
+                export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.dev
 
-#                 ./update-okta.sh
-# - stage: prd
-#   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-#   jobs:
-#   - deployment: auth_prd
-#     displayName: auth.homevalet.co
-#     environment: Okta
-#     variables:
-#     - group: LetsEncryptStorageSAS - Prod
-#     - name: CertificateNames
-#       value: auth.homevalet.co
-#     - name: KeyVaultResourceId
-#       value: /subscriptions/5231ee57-0984-4eda-8e8e-81cae16a67a4/resourceGroups/hv-prd-ops/providers/Microsoft.KeyVault/vaults/hv-prd-001-kv-ops-01
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - template: acme-update-steps.yml
-#   - deployment: wildcard_prd
-#     displayName: homevalet.co,*.homevalet.co
-#     environment: Operations
-#     variables:
-#     - group: LetsEncryptStorageSAS - Prod
-#     - name: CertificateNames
-#       value: homevalet.co,*.homevalet.co
-#     - name: KeyVaultResourceId
-#       value: /subscriptions/5231ee57-0984-4eda-8e8e-81cae16a67a4/resourceGroups/hv-prd-ops/providers/Microsoft.KeyVault/vaults/hv-prd-001-kv-ops-01
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - template: acme-update-steps.yml
-# - stage: okta
-#   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-#   jobs:
-#   - deployment:
-#     displayName: Update Okta
-#     environment: Okta
-#     variables:
-#     - group: Okta
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - checkout: self
-#           - task: AzureCLI@2
-#             displayName: Update Okta
-#             inputs:
-#               azureSubscription: Azure - HomeValet Platform Production
-#               scriptType: bash
-#               scriptLocation: inlineScript
-#               inlineScript: |  
-#                 export VAULT_NAME=hv-prd-001-kv-ops-01
-#                 export CERT_NAME=auth-homevalet-co
-#                 export OKTA_API_TOKEN=$(OktaApiToken)
-#                 export OKTA_ORG_NAME=homevalet
-#                 export OKTA_BASE_URL=okta.com
-#                 export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.co
+                ./update-okta.sh
+- stage: prd
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - deployment: auth_prd
+    displayName: auth.homevalet.co
+    environment: Okta
+    variables:
+    - group: LetsEncryptStorageSAS - Prod
+    - name: CertificateNames
+      value: auth.homevalet.co
+    - name: KeyVaultResourceId
+      value: /subscriptions/5231ee57-0984-4eda-8e8e-81cae16a67a4/resourceGroups/hv-prd-ops/providers/Microsoft.KeyVault/vaults/hv-prd-001-kv-ops-01
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: acme-update-steps.yml
+  - deployment: wildcard_prd
+    displayName: homevalet.co,*.homevalet.co
+    environment: Operations
+    variables:
+    - group: LetsEncryptStorageSAS - Prod
+    - name: CertificateNames
+      value: homevalet.co,*.homevalet.co
+    - name: KeyVaultResourceId
+      value: /subscriptions/5231ee57-0984-4eda-8e8e-81cae16a67a4/resourceGroups/hv-prd-ops/providers/Microsoft.KeyVault/vaults/hv-prd-001-kv-ops-01
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: acme-update-steps.yml
+- stage: okta
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - deployment:
+    displayName: Update Okta
+    environment: Okta
+    variables:
+    - group: Okta
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: Update Okta
+            inputs:
+              azureSubscription: Azure - HomeValet Platform Production
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |  
+                export VAULT_NAME=hv-prd-001-kv-ops-01
+                export CERT_NAME=auth-homevalet-co
+                export OKTA_API_TOKEN=$(OktaApiToken)
+                export OKTA_ORG_NAME=homevalet
+                export OKTA_BASE_URL=okta.com
+                export OKTA_CUSTOM_AUTH_HOSTNAME=auth.homevalet.co
 
-#                 ./update-okta.sh
+                ./update-okta.sh
