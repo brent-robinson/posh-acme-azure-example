@@ -17,7 +17,7 @@ $env:POSHACME_HOME = $workingDirectory
 Import-Module -Name Posh-ACME -Force
 
 # Resolve the details of the certificate
-$currentServerName = ((Get-PAServer).location) -split "/" | Where-Object -FilterScript { $_ } | Select-Object -Skip 1 -First 1
+$currentServerName = ((Get-PAServer).Name)
 $currentAccountName = (Get-PAAccount).id
 
 # Determine paths to resources
@@ -28,10 +28,12 @@ $pfxFilePath = Join-Path -Path $orderDirectoryPath -ChildPath "fullchain.pfx"
 # If we have a order and certificate available
 if ((Test-Path -Path $orderDirectoryPath) -and (Test-Path -Path $orderDataPath) -and (Test-Path -Path $pfxFilePath)) {
 
-    $pfxPass = (Get-PAOrder $certificateName).PfxPass
-
+    # Load order data
+    $pfxPass = (Get-PAOrder -Name $certificateName).PfxPass
+    $securePfxPass = ConvertTo-SecureString $pfxPass -AsPlainText -Force
+    
     # Load PFX
-    $certificate = New-Object -TypeName System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList $pfxFilePath, $pfxPass, 'EphemeralKeySet'
+    $certificate = Get-PfxCertificate $pfxFilePath -Password $securePfxPass
 
     # Get the current certificate from key vault (if any)
     $azureKeyVaultCertificateName = $certificateName.Replace(".", "-").Replace("!", "wildcard")
@@ -40,6 +42,9 @@ if ((Test-Path -Path $orderDirectoryPath) -and (Test-Path -Path $orderDataPath) 
 
     # If we have a different certificate, import it
     If (-not $azureKeyVaultCertificate -or $azureKeyVaultCertificate.Thumbprint -ne $certificate.Thumbprint) {
-        Import-AzKeyVaultCertificate -VaultName $keyVaultResource.Name -Name $azureKeyVaultCertificateName -FilePath $pfxFilePath -Password (ConvertTo-SecureString -String $pfxPass -AsPlainText -Force) | Out-Null
+        Import-AzKeyVaultCertificate -VaultName $keyVaultResource.Name -Name $azureKeyVaultCertificateName -FilePath $pfxFilePath -Password $securePfxPass | Out-Null
     }
+} else {
+    Write-Output "Resource Path(s) not valid."
+    exit 1
 }
