@@ -38,10 +38,26 @@ if (-not $accounts -or $accounts.Length -eq 0) {
     $account = $accounts[0]
 }
 
+echo "Account"
+$account
 $account | Set-PAAccount
+echo ""
 
-$order = Get-PAOrder
-Write-Host $order
+echo "Orders"
+Get-PAOrder -List
+echo ""
+
+# If only one host name is passed, $CertificateNamesArr will be a string instead of an array
+if ($CertificateNamesArr -is [array]) {
+    $order = Get-PAOrder $CertificateNamesArr[0]
+} else {
+    $order = Get-PAOrder $CertificateNamesArr
+}
+
+echo "Selected Order"
+$order | Format-Table
+echo ""
+
 if (-not $order) {
     $pArgs = @{ CFTokenInsecure = $CloudFlareAPIToken }
     New-PACertificate -Domain $CertificateNamesArr -DnsPlugin Cloudflare -PluginArgs $pArgs
