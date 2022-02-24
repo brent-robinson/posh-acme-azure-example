@@ -71,10 +71,10 @@ if (-not $order) {
     # KMS 2022 JAN 5
     if ($order.CertExpires -eq $null -or $(New-Timespan -Start $(Get-Date) -End $order.CertExpires).Days -lt 45) {
         echo "Renewing with force"
-        Submit-Renewal -Force
+        Submit-Renewal -Name $order.Name -Force
     } else {
         echo "Renewing"
-        Submit-Renewal
+        Submit-Renewal -Name $order.Name
     }
 }
 
