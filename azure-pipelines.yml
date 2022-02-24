@@ -58,6 +58,20 @@ stages:
         deploy:
           steps:
           - template: acme-update-steps.yml
+  - deployment: wildcard_qa
+    displayName: homevalet.dev,*.homevalet.dev
+    environment: Operations
+    variables:
+    - group: LetsEncryptStorageSAS - Dev
+    - name: CertificateNames
+      value: homevalet.dev,*.homevalet.dev
+    - name: KeyVaultResourceId
+      value: /subscriptions/02313c9f-9060-4475-b81b-11e95e64e437/resourceGroups/hv-qa-ops/providers/Microsoft.KeyVault/vaults/hv-qa-001-kv-ops-01
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: acme-update-steps.yml
 - stage: okta_preview
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   jobs:
