@@ -50,7 +50,7 @@ stages:
     variables:
     - group: LetsEncryptStorageSAS - Dev
     - name: CertificateNames
-      value: homevalet.dev,*.homevalet.dev
+      value: DEV homevalet.dev,*.homevalet.dev
     - name: KeyVaultResourceId
       value: /subscriptions/fde10e22-fd9d-46b2-8198-b30540d5c76d/resourceGroups/hv-dev-ops/providers/Microsoft.KeyVault/vaults/hv-dev-001-kv-ops-01
     strategy:
@@ -59,7 +59,11 @@ stages:
           steps:
           - template: acme-update-steps.yml
   - deployment: wildcard_qa
-    displayName: homevalet.dev,*.homevalet.dev
+    # Becuase they use the same cert, we do not want a renewal with dev happening at the same
+    # time, we really just want to push it to key vault only
+    # KMS 2022 FEB 24
+    dependsOn: wildcard_dev
+    displayName: QA homevalet.dev,*.homevalet.dev
     environment: Operations
     variables:
     - group: LetsEncryptStorageSAS - Dev
