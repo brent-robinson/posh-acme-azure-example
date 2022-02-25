@@ -45,7 +45,7 @@ stages:
           steps:
           - template: acme-update-steps.yml
   - deployment: wildcard_dev
-    displayName: homevalet.dev,*.homevalet.dev
+    displayName: DEV homevalet.dev,*.homevalet.dev
     environment: Operations
     variables:
     - group: LetsEncryptStorageSAS - Dev
@@ -59,7 +59,11 @@ stages:
           steps:
           - template: acme-update-steps.yml
   - deployment: wildcard_qa
-    displayName: homevalet.dev,*.homevalet.dev
+    # Becuase they use the same cert, we do not want a renewal with dev happening at the same
+    # time, we really just want to push it to key vault only
+    # KMS 2022 FEB 24
+    dependsOn: wildcard_dev
+    displayName: QA homevalet.dev,*.homevalet.dev
     environment: Operations
     variables:
     - group: LetsEncryptStorageSAS - Dev
